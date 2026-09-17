@@ -1,36 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vintage Music Player</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
-    body { font-family: 'Orbitron', monospace; }
-   .trail {
-      position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999;
-      background: radial-gradient(circle, #ffcc66 0%, #ff8800 70%, transparent 100%);
-      box-shadow: 0 0 10px #ffaa33, 0 0 20px #ff8800; transform: translate(-50%, -50%);
-    }
-   .scroll-hide::-webkit-scrollbar { display: none; }
-   .scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRO Vintage Tape Deck VT-3000</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Orbitron', monospace;
+    background: #1a1410;
+    background-image: radial-gradient(#2a221a 2px, transparent 2px);
+    background-size: 6px 6px;
+    color: #f5e6c4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    overflow-x: hidden;
+  }
+
+  /* CURSOR TRAIL - BIGGER GLOW */
+.trail {
+    position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999;
+    background: radial-gradient(circle, #ffe066 0%, #ffaa00 50%, transparent 100%);
+    box-shadow: 0 0 20px #ffaa00, 0 0 40px #ff8800; transform: translate(-50%, -50%);
+  }
+
+  /* BIGGER PLAYER */
+.player {
+    width: 100%; max-width: 850px;
+    background: linear-gradient(145deg, #d4b98a, #bfa16f);
+    border: 12px solid #6b5433;
+    border-radius: 30px;
+    box-shadow: inset 0 0 0 6px #4a3720, 0 30px 60px rgba(0,0,0,0.7);
+    padding: 32px;
+  }
+.brand { text-align: center; color: #2b2118; margin-bottom: 24px; }
+.brand h1 { font-size: 32px; font-weight: 900; letter-spacing: 4px; text-shadow: 2px 2px #fff5; }
+.brand p { font-size: 14px; opacity: 0.8; letter-spacing: 2px; }
+
+  /* SEARCH BAR */
+.search {
+    display: flex; gap: 10px; margin-bottom: 20px;
+  }
+.search input {
+    flex: 1; padding: 14px; font-size: 16px; border-radius: 10px;
+    border: 4px inset #8b6f47; background: #fff8e1; color: #2b2118; font-family: inherit;
+  }
+.search button {
+    padding: 14px 24px; font-size: 16px; font-weight: 700; border-radius: 10px;
+    border: 4px outset #8b6f47; background: #a68b5b; color: #2b2118; cursor: pointer;
+  }
+.search button:active { border-style: inset; }
+
+  /* BIG CASSETTE WITH REELS */
+.deck {
+    background: #0a0806; border-radius: 20px; padding: 24px; border: 6px solid #3a2a1a;
+    box-shadow: inset 0 0 30px #000;
+  }
+.reels {
+    display: flex; justify-content: space-around; margin-bottom: 20px;
+  }
+.reel {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: radial-gradient(circle, #444 30%, #111 70%);
+    border: 4px solid #222; position: relative;
+    animation: spin 2s linear infinite; animation-play-state: paused;
+  }
+.reel.playing { animation-play-state: running; }
+.reel::before {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 20px; height: 20px; background: #666; border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+ @keyframes spin { from {transform: rotate(0deg);} to {transform: rotate(360deg);} }
+
+.now-playing {
+    display: flex; gap: 20px; align-items: center; background: #000;
+    padding: 16px; border-radius: 12px; margin-bottom: 20px;
+  }
+.now-playing img { width: 100px; height: 100px; border-radius: 10px; border: 3px solid #5a4328; }
+.now-playing h3 { font-size: 18px; color: #f5e6c4; }
+.now-playing p { font-size: 14px; color: #a68b5b; }
+
+  /* DUAL VU METERS */
+.vu-container { display: flex; gap: 10px; margin-bottom: 20px; }
+.vu { flex: 1; height: 30px; background: #000; border-radius: 6px; overflow: hidden; border: 2px solid #333; }
+.vu-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #00ff00 0%, #ffff00 70%, #ff0000 100%); }
+
+.controls { display: flex; justify-content: center; align-items: center; gap: 20px; }
+.big-knob {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ddd, #333);
+    border: 5px solid #111; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: #111; font-size: 28px; font-weight: 700;
+  }
+.big-knob:active { transform: scale(0.92); }
+.volume { width: 150px; }
+
+.playlist { margin-top: 20px; max-height: 350px; overflow-y: auto; }
+.track {
+    background: #0a0806; padding: 14px; border-radius: 10px; display: flex; gap: 16px;
+    align-items: center; margin-bottom: 10px; cursor: pointer; border: 3px solid transparent;
+  }
+.track:hover,.track.active { border-color: #a68b5b; background: #1a1611; }
+.track img { width: 60px; height: 60px; border-radius: 8px; }
+.track h4 { font-size: 15px; }
+.track p { font-size: 12px; color: #a68b5b; }
+</style>
 </head>
-<body class="min-h-screen bg-[#2b2118] bg-[radial-gradient(#3a2f23_1px,transparent_1px)] bg-[size:4px_4px] flex items-center justify-center p-4">
+<body>
 
-  <div id="trail-container"></div>
+<div id="trails"></div>
 
-  <div class="w-full max-w-xl bg-[#d4b98a] border-8 border-[#8b6f47] rounded-[20px] shadow-[inset_0_0_0_4px_#5a4328,0_20px_40px_rgba(0,0,0,0.5)] p-6">
-    <div class="text-center text-[#2b2118] mb-4">
-      <h1 class="text-xl font-bold tracking-widest">RETRO TAPE DECK</h1>
-      <p class="text-xs opacity-70">MODEL VT-1986 • STEREO CASSETTE</p>
+<div class="player">
+  <div class="brand">
+    <h1>PRO TAPE DECK VT-3000</h1>
+    <p>DOLBY STEREO • HIGH FIDELITY</p>
+  </div>
+
+  <div class="search">
+    <input id="searchInput" type="text" placeholder="Search artist or song...">
+    <button onclick="searchSongs()">SEARCH</button>
+  </div>
+
+  <div class="deck">
+    <div class="reels">
+      <div class="reel" id="reel1"></div>
+      <div class="reel" id="reel2"></div>
     </div>
 
-    <!-- PLAYER -->
-    <div class="w-full bg-[#1a1611] border-4 border-[#5a4328] rounded-2xl p-4 shadow-2xl">
-      <div class="flex gap-4 items-center">
-        <img id="cover" src="https://picsum.photos/seed/1/200" class="w-20 h-20 rounded-lg border-2 border-[#8b6f47] object-cover" />
-        <div class="flex-1 overflow-hidden">
-          <h3 id="title" class="font-bold text-[#f5e6c4] truncate">Vintage Vibes 1</h3>
-          <p id="artist" class="text-sm text-[#a
+    <div class="now-playing">
+      <img id="cover" src="https://picsum.photos/seed/1/200" alt="">
+      <div>
+        <h3 id="title">Select a Track</h3>
+        <p id="artist">From the playlist below</p>
+        <div class="vu-container">
+          <div class="vu"><div class="vu-bar" id="vu1"></div></div>
+          <div class="vu"><div class="vu-bar" id="vu2"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="big-knob" id="prev">⏮</div>
+      <div class="big-knob" id="play">▶</div>
+      <div class="big-knob" id="next">⏭</div>
+      <input type="range" id="volume" class="volume" min="0" max="1" step="0.01" value="0.7">
+    </div>
+    <audio id="audio"></audio>
+  </div>
+
+  <div class="playlist" id="playlist"></div>
+</div>
+
+<script>
+  // 1. BIGGER CURSOR TRAIL
+  const trailContainer = document.getElementById('trails');
+  const trails = [];
+  for(let i=0; i<20; i++){
+    const d = document.createElement('div'); d.className='trail';
+    d.style.width = d.style.height = (14 - i*0.5)+'px';
+    d.style.opacity = 1 - i*0.05;
+    trailContainer.appendChild(d); trails.push({el:d, x:-100, y:-100});
+  }
+  let mx=-100, my=-100;
+  document.addEventListener('mousemove', e=>{mx=e.clientX; my=e.clientY;});
+  (function animate(){
+    let x=mx, y=my;
+    trails.forEach(t=>{ t.x+=(x-t.x)*0.2; t.y+=(y-t.y)*0.2; t.el.style.left=t.x+'px'; t.el.style.top=t.y+'px'; x=t.x; y=t.y; });
+    requestAnimationFrame(animate);
+  })();
+
+  // 2. MUSIC PLAYER LOGIC
+  let songs = [
+    {src:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", img:"https://picsum.photos/seed/1/200", title:"Vintage Vibes 1", artist:"Retro Band"},
+    {src:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", img:"https://picsum.photos/seed/2/200", title:"Tape Deck Dreams", artist:"80s Synth"},
+    {src:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", img:"https://picsum.photos/seed/3/200", title:"Cassette Love", artist:"Lo-Fi Beats"}
+  ];
+
+  let current = 0;
+  const audio = document.getElementById('audio');
+  audio.volume = 0.7;
+  const playBtn = document.getElementById('play');
+  const title = document.getElementById('title');
+  const artist = document.getElementById('artist');
+  const cover = document.getElementById('cover');
+  const vu1 = document.getElementById('vu1');
+  const vu2 = document.getElementById('vu2');
+  const reel1 = document.getElementById('reel1');
+  const reel2 = document.getElementById('reel2');
+  const playlistEl = document.getElementById('playlist');
+
+  function loadSong(i){
+    current = i;
+    const s = songs[i];
+    audio.src = s.src;
+    title.innerText = s.title;
+    artist.innerText = s.artist;
+    cover.src = s.img;
+    document.querySelectorAll('.track').forEach((el, idx)=> el.classList.toggle('active', idx===i));
+  }
+
+  function togglePlay(){
+    if(audio.paused){
+      audio.play();
+      playBtn.innerText='⏸';
+      reel1.classList.add('playing');
+      reel2.classList.add('playing');
+    }
+    else{
+      audio.pause();
+      playBtn.innerText='▶';
+      reel1.classList.remove('playing');
+      reel2.classList.remove('playing');
+    }
+  }
+
+  // Fake VU meter animation
+  setInterval(()=>{
+    if(!audio.paused){
+      vu1.style.width = Math.random()*100 + '%';
+      vu2.style.width = Math.random()*90 + '%';
+    } else {
+      vu1.style.width = '0%';
+      vu2.style.width = '0%';
+    }
+  }, 100);
+
+  audio.addEventListener('ended', ()=>{ loadSong((current+1)%songs.length); audio.play(); });
+  playBtn.onclick = togglePlay;
+  document.getElementById('next').onclick = ()=>{ loadSong((current+1)%songs.length); audio.play(); playBtn.innerText='⏸'; reel1.classList.add('playing'); reel2.classList.add('playing'); };
+  document.getElementById('prev').onclick = ()=>{ loadSong((current-1+songs.length)%songs.length); audio.play(); playBtn.innerText='⏸'; reel1.classList.add('playing'); reel2.classList.add('playing'); };
+  document.getElementById('volume').oninput = (e)=> audio.volume = e.target.value;
+
+  function renderPlaylist(){
+    playlistEl.innerHTML = '';
+    songs.forEach((s,i)=>{
+      const div = document.createElement('div'); div.className='track';
+      div.innerHTML = `<img src="${s.img}"><div><h4>${s.title}</h4><p>${s.artist}</p></div>`;
+      div.onclick = ()=>{ loadSong(i); audio.play(); playBtn.innerText='⏸'; reel1.classList.add('playing'); reel2.classList.add('playing'); };
+      playlistEl.appendChild(div);
+    });
+  }
+
+  function searchSongs(){
+    const q = document.getElementById('searchInput').value;
+    if(!q) return;
+    // Using iTunes API for 30s previews
+    fetch(`https://itunes.apple.com/search?term=${q}&entity=song&limit=8`)
+   .then(res=>res.json())
+   .then(data=>{
+      songs = data.results.filter(t=>t.previewUrl).map(t=>({
+        src: t.previewUrl,
+        img: t.artworkUrl100,
+        title: t.trackName,
+        artist: t.artistName
+      }));
+      renderPlaylist();
+      if(songs.length>0) loadSong(0);
+    });
+  }
+
+  renderPlaylist();
+  loadSong(0);
+</script>
+</body>
+</html>a
