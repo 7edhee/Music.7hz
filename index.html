@@ -5,97 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vintage Music Player</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/framer-motion@10.18.0/dist/framer-motion.js"></script>
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
     body { font-family: 'Orbitron', monospace; }
-    /* hide scrollbar but keep scroll */
+   .trail {
+      position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999;
+      background: radial-gradient(circle, #ffcc66 0%, #ff8800 70%, transparent 100%);
+      box-shadow: 0 0 10px #ffaa33, 0 0 20px #ff8800; transform: translate(-50%, -50%);
+    }
    .scroll-hide::-webkit-scrollbar { display: none; }
    .scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body>
-  <div id="root"></div>
+<body class="min-h-screen bg-[#2b2118] bg-[radial-gradient(#3a2f23_1px,transparent_1px)] bg-[size:4px_4px] flex items-center justify-center p-4">
 
-  <script type="text/babel">
-    const { useState, useRef, useEffect } = React;
-    const { motion } = framerMotion;
+  <div id="trail-container"></div>
 
-    // ===== CURSOR TRAIL COMPONENT =====
-    function CursorTrail() {
-      const [positions, setPositions] = useState(Array(15).fill({ x: -100, y: -100 }));
+  <div class="w-full max-w-xl bg-[#d4b98a] border-8 border-[#8b6f47] rounded-[20px] shadow-[inset_0_0_0_4px_#5a4328,0_20px_40px_rgba(0,0,0,0.5)] p-6">
+    <div class="text-center text-[#2b2118] mb-4">
+      <h1 class="text-xl font-bold tracking-widest">RETRO TAPE DECK</h1>
+      <p class="text-xs opacity-70">MODEL VT-1986 • STEREO CASSETTE</p>
+    </div>
 
-      useEffect(() => {
-        let mouseX = -100, mouseY = -100;
-        const handleMouseMove = (e) => { mouseX = e.clientX; mouseY = e.clientY; };
-        window.addEventListener('mousemove', handleMouseMove);
-
-        const animate = () => {
-          setPositions(prev => {
-            let x = mouseX, y = mouseY;
-            return prev.map(p => {
-              const newP = { x: p.x + (x - p.x) * 0.3, y: p.y + (y - p.y) * 0.3 };
-              x = newP.x; y = newP.y;
-              return newP;
-            });
-          });
-          requestAnimationFrame(animate);
-        };
-        animate();
-        return () => window.removeEventListener('mousemove', handleMouseMove);
-      }, []);
-
-      return (
-        <>
-          {positions.map((pos, i) => (
-            <div
-              key={i}
-              className="fixed rounded-full pointer-events-none z-[9999]"
-              style={{
-                left: pos.x, top: pos.y,
-                width: 10 - i * 0.4, height: 10 - i * 0.4,
-                opacity: 1 - i * 0.06,
-                background: 'radial-gradient(circle, #ffcc66 0%, #ff8800 70%, transparent 100%)',
-                boxShadow: '0 0 10px #ffaa33, 0 0 20px #ff8800',
-                transform: 'translate(-50%, -50%)'
-              }}
-            />
-          ))}
-        </>
-      );
-    }
-
-    // ===== MUSIC PLAYER COMPONENT =====
-    function MusicPlayer({ src, coverArt, title, artist }) {
-      const [isPlaying, setIsPlaying] = useState(false);
-      const audioRef = useRef(null);
-      const [progress, setProgress] = useState(0);
-
-      useEffect(() => {
-        if (!audioRef.current) return;
-        isPlaying? audioRef.current.play() : audioRef.current.pause();
-      }, [isPlaying, src]);
-
-      useEffect(() => {
-        const audio = audioRef.current;
-        if (!audio) return;
-        const update = () => setProgress((audio.currentTime / audio.duration) * 100 || 0);
-        audio.addEventListener('timeupdate', update);
-        audio.addEventListener('loadeddata', update);
-        return () => {
-          audio.removeEventListener('timeupdate', update);
-          audio.removeEventListener('loadeddata', update);
-        }
-      }, [src]);
-
-      return (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full bg-[#1a1611] border-4 border-[#5a4328] rounded-2xl p-4 shadow-2xl"
-        >
-          <div className="flex gap-4 items-center">
-            <img src={coverArt} alt={title} className="w-20 h-20 rounded-lg border-2 border-[#8b6f47] object-cover
+    <!-- PLAYER -->
+    <div class="w-full bg-[#1a1611] border-4 border-[#5a4328] rounded-2xl p-4 shadow-2xl">
+      <div class="flex gap-4 items-center">
+        <img id="cover" src="https://picsum.photos/seed/1/200" class="w-20 h-20 rounded-lg border-2 border-[#8b6f47] object-cover" />
+        <div class="flex-1 overflow-hidden">
+          <h3 id="title" class="font-bold text-[#f5e6c4] truncate">Vintage Vibes 1</h3>
+          <p id="artist" class="text-sm text-[#a
